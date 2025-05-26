@@ -1,6 +1,11 @@
 # react-game
 React phaser game for study
 
+# Game Domain
+```commandline
+https://react-game-ochre.vercel.app/
+```
+
 #### generate template
 ```commandline
 npm create @phaserjs/game@latest
