@@ -1,5 +1,6 @@
 import { Boot } from './scenes/Boot';
 import { Game } from './scenes/Game';
+import { City } from './scenes/City';
 import { GameOver } from './scenes/GameOver';
 import { MainMenu } from './scenes/MainMenu';
 import Phaser from 'phaser';
@@ -18,14 +19,13 @@ const config = {
         Preloader,
         MainMenu,
         Game,
+        City,
         GameOver
     ]
 };
 
 const StartGame = (parent) => {
-
     return new Phaser.Game({ ...config, parent });
-
 }
 
 export default StartGame;
