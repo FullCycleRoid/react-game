@@ -17,6 +17,12 @@ export class SpineScene extends Scene
     }
 
     create () {
+        const animations = [
+          "aim", "death", "hoverboard", "idle", 
+          "idle-turn", "jump", "portal", 
+          "run", "run-to-idle", "shoot", "walk"
+        ];
+    
         const spineboy = this.add.spine(
           400,
           500,
@@ -24,7 +30,30 @@ export class SpineScene extends Scene
           "spineboy-atlas"
         );
         spineboy.scale = 0.5;
-        spineboy.animationState.setAnimation(0, "walk", true);
+        
+//        One animation
+//        console.log(spineboy.skeleton.data.animations);
+//        spineboy.animationState.setAnimation(0, "shoot", true);
+        
+//        Change animation every 3 sec
+        this.time.addEvent({
+          delay: 3000, // Интервал в мс
+          callback: () => {
+            const randomAnim = Phaser.Utils.Array.GetRandom(animations);
+            spineboy.animationState.setAnimation(0, randomAnim, false);
+
+            // После завершения возвращаем в "idle"
+            spineboy.animationState.addAnimation(0, "idle", true, 0);
+          },
+          loop: true
+        });
+        
+//        Change animation by click
+//        this.input.on('pointerdown', () => {
+//          const randomAnim = Phaser.Utils.Array.GetRandom(animations);
+//          spineboy.animationState.setAnimation(0, randomAnim, false);
+//          spineboy.animationState.addAnimation(0, "idle", true, 0);
+//        });
     }
 
     changeScene ()
