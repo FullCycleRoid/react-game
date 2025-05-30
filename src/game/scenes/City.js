@@ -74,6 +74,6 @@ export class City extends Scene
 
     changeScene ()
     {
-        this.scene.start('GameOver');
+        this.scene.start('Spine');
     }
 }

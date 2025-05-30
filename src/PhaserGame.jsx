@@ -12,7 +12,6 @@ export const PhaserGame = forwardRef(function PhaserGame ({ currentActiveScene }
         if (game.current === undefined)
         {
             game.current = StartGame("game-container");
-            debugger
             if (ref !== null)
             {
                 ref.current = { game: game.current, scene: null };

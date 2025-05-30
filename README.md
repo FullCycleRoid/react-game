@@ -1,12 +1,17 @@
 # react-game
 React phaser game for study
 
-# Game Domain
+## Install Requirements
+
+* npm i phaser@4.0.0-alpha.4
+* npm install @esotericsoftware/spine-phaser-v4@4.2.82
+
+## Game Domain
 ```commandline
 https://react-game-ochre.vercel.app/
 ```
 
-#### generate template
+## generate template
 ```commandline
 npm create @phaserjs/game@latest
 ```
