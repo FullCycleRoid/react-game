@@ -71,10 +71,10 @@ export class CharGen extends Scene {
         this.character.setBodyPart('torso', 'torso', 0, 0);
         
         // Human-head
-        this.character.setBodyPart('head', 'head', 0, -50);
+        this.character.setBodyPart('head', 'head', 0, -40);
         
         // Руки
-//        this.character.setBodyPart('arm_upper_right', 2, -30, -30);
+        this.character.setBodyPart('arm_upper_right', 1, -40, -50);
 //        this.character.setBodyPart('arm_lower_right', 3, -50, -10);
 //        this.character.setBodyPart('arm_upper_left', 2, 30, -30).setFlipX(true);
 //        this.character.setBodyPart('arm_lower_left', 3, 50, -10).setFlipX(true);
@@ -88,7 +88,7 @@ export class CharGen extends Scene {
         
         // Используем доступный кадр Human-leg.png вместо Human-10
         this.character.setBodyPart('leg_upper_left', 'leg', 20, 65);
-        this.character.setBodyPart('leg_upper_right', 'leg', -10, 65);
+        this.character.setBodyPart('leg_upper_right', 'leg', -10, 70);
         
         // Тень
 //        this.character.setBodyPart('shadow', 1, 0, 160).setAlpha(0.3);
