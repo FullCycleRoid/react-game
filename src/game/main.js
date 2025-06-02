@@ -3,6 +3,7 @@ import { Game } from './scenes/Game';
 import { City } from './scenes/City';
 import { SpineScene } from './scenes/Spine';
 import { GameOver } from './scenes/GameOver';
+import { CharGen } from './scenes/CharGenerator';
 import { MainMenu } from './scenes/MainMenu';
 import Phaser from 'phaser';
 import { Preloader } from './scenes/Preloader';
@@ -20,6 +21,7 @@ const config = {
     scene: [
         Boot,
         Preloader,
+        CharGen,
         MainMenu,
         Game,
         City,
