@@ -1,58 +1,6 @@
 import { EventBus } from '../EventBus';
 import { Scene } from 'phaser';
-
-class CharacterBuilder {
-    constructor(scene) {
-        this.scene = scene;
-        this.container = this.scene.add.container(400, 300);
-        this.bodyParts = {};
-    }
-
-    /**
-     * Добавляет или заменяет часть тела
-     * @param {string} partType - например: 'head', 'torso', 'arm_upper_right'
-     * @param {number|string} atlasIndex - индекс из атласа (Human-0, Human-1, ... Human-head)
-     * @param {number} offsetX - смещение X относительно центра
-     * @param {number} offsetY - смещение Y относительно центра
-     */
-    setBodyPart(partType, atlasIndex, offsetX = 0, offsetY = 0) {
-        if (this.bodyParts[partType]) {
-            this.bodyParts[partType].destroy();
-        }
-
-        // Формируем имя кадра с учетом расширения .png
-        let frameName;
-        if (atlasIndex === 'head') {
-            frameName = 'Human-head.png';
-        } else if (atlasIndex === 'torso') {
-            frameName = 'Human-torso.png';
-        } else if (atlasIndex === 'leg') {
-            frameName = 'Human-leg.png';
-        } else {
-            frameName = `Human-${atlasIndex}.png`;
-        }
-
-        // Проверяем существование кадра
-        if (!this.scene.textures.getFrame('human-body', frameName)) {
-            console.warn(`Frame "${frameName}" not found in texture atlas`);
-            return null;
-        }
-
-        const sprite = this.scene.add.sprite(offsetX, offsetY, 'human-body', frameName);
-        this.container.add(sprite);
-        this.bodyParts[partType] = sprite;
-        return sprite;
-    }
-
-    clear() {
-        this.container.removeAll(true);
-        this.bodyParts = {};
-    }
-
-    getPart(partType) {
-        return this.bodyParts[partType];
-    }
-}
+import { CharacterBuilder } from '../character/CharBuilder';
 
 export class CharGen extends Scene {
     constructor() {
@@ -60,41 +8,66 @@ export class CharGen extends Scene {
     }
 
     preload() {
-        this.load.atlas('human-body', 'assets/bodies/human-body.png', 'assets/bodies/human-body.json');
+        // Load assets with error handling
+        this.load.on('fileerror', (file) => {
+            console.error(`Failed to load file: ${file.key}`);
+        });
+
+        this.load.atlas('human-body', 'assets/bodies/Human-body.png', 'assets/bodies/human-body.json');
+//        this.load.multiatlas('human-body', 'assets/city/cityscene.json', 'assets/city');
+
     }
 
     create() {
+        console.log('Creating character...');
+        
+        // Create character builder
         this.character = new CharacterBuilder(this);
 
-        // === Собираем персонажа из частей ===
-        // Human-torso
-        this.character.setBodyPart('torso', 'torso', 0, 0);
-        
-        // Human-head
-        this.character.setBodyPart('head', 'head', 0, -40);
-        
-        // Руки
-        this.character.setBodyPart('arm_upper_right', 1, -40, -50);
-//        this.character.setBodyPart('arm_lower_right', 3, -50, -10);
-//        this.character.setBodyPart('arm_upper_left', 2, 30, -30).setFlipX(true);
-//        this.character.setBodyPart('arm_lower_left', 3, 50, -10).setFlipX(true);
-        
-        // Таз и ноги (исправляем индекс 10 на доступный)
-        this.character.setBodyPart('hips', 5,4, 35);
-//        this.character.setBodyPart('leg_upper_right', 5, -250, 200);
-//        this.character.setBodyPart('leg_lower_right', 6, -15, 110);
-//        this.character.setBodyPart('foot_right', 7, -15, 135);
-//        this.character.setBodyPart('foot_left', 8, 15, 135);
-        
-        // Используем доступный кадр Human-leg.png вместо Human-10
-        this.character.setBodyPart('leg_upper_left', 'leg', 20, 65);
-        this.character.setBodyPart('leg_upper_right', 'leg', -10, 70);
-        
-        // Тень
-//        this.character.setBodyPart('shadow', 1, 0, 160).setAlpha(0.3);
+        // Build character parts - using exact frame names from JSON
+        this.buildCharacter();
 
-        // === Кнопки управления ===
-        // Перемещение головы
+        // Add UI controls
+        this.addControls();
+    }
+
+    buildCharacter() {
+        // === Character assembly from JSON atlas ===
+        // Torso
+        this.character.setBodyPart('torso', 'Torso', 0, 0);
+        
+        // Head (if exists in atlas)
+        if (this.textures.getFrame('human-body', 'Head')) {
+            this.character.setBodyPart('head', 'Head', 0, -40);
+        }
+        
+        // Right arm
+        this.character.setBodyPart('arm_upper_right', 'ArmR', -40, -50);
+        this.character.setBodyPart('forearm_right', 'ForearmR', -50, -10);
+        
+        // Left arm (with flip)
+        const leftArm = this.character.setBodyPart('arm_upper_left', 'ArmL', 30, -30);
+        if (leftArm) leftArm.setFlipX(true);
+        const leftForearm = this.character.setBodyPart('forearm_left', 'ForearmL', 50, -10);
+        if (leftForearm) leftForearm.setFlipX(true);
+        
+        // Pelvis and legs
+        this.character.setBodyPart('pelvis', 'Pelvis', 0, 35);
+        this.character.setBodyPart('leg_upper_right', 'Leg', -10, 70);
+        this.character.setBodyPart('leg_upper_left', 'Leg', 20, 65);
+        this.character.setBodyPart('shin_right', 'Shin', -15, 110);
+        this.character.setBodyPart('shin_left', 'Shin', 15, 110);
+        
+        // Hands and details
+        this.character.setBodyPart('hand_right', 'HandR', -15, 135);
+        this.character.setBodyPart('hand_left', 'HandL', 15, 135);
+        this.character.setBodyPart('sleeve_right', 'SleeveR', 0, -20);
+        this.character.setBodyPart('finger', 'Finger', 20, -30);
+    }
+
+    addControls() {
+        // === Control buttons ===
+        // Head movement (if head exists)
         const moveHeadUp = this.add.text(20, 20, 'Move Head Up', {
             fontSize: '16px',
             backgroundColor: '#444',
@@ -103,7 +76,7 @@ export class CharGen extends Scene {
         
         moveHeadUp.on('pointerdown', () => {
             const head = this.character.getPart('head');
-            if (head) head.y -= 10;
+            if (head) head.y -= 5;
         });
 
         const moveHeadDown = this.add.text(20, 60, 'Move Head Down', {
@@ -114,9 +87,10 @@ export class CharGen extends Scene {
         
         moveHeadDown.on('pointerdown', () => {
             const head = this.character.getPart('head');
-            if (head) head.y += 10;
+            if (head) head.y += 5;
         });
 
+        // Reset button
         const resetPosition = this.add.text(20, 100, 'Reset Position', {
             fontSize: '16px',
             backgroundColor: '#444',
@@ -125,19 +99,22 @@ export class CharGen extends Scene {
         
         resetPosition.on('pointerdown', () => {
             this.character.clear();
-            this.create();
+            this.buildCharacter();
         });
 
-        // === Эксперименты с заменой частей ===
-        const swapHead = this.add.text(20, 140, 'Swap Head (Try Other Parts)', {
+        // Head swapping (example)
+        const swapHead = this.add.text(20, 140, 'Swap Head', {
             fontSize: '16px',
             backgroundColor: '#444',
             padding: { left: 10, right: 10, top: 5, bottom: 5 }
         }).setInteractive();
         
         swapHead.on('pointerdown', () => {
-            // Пробуем заменить голову на Human-6.png
-            this.character.setBodyPart('head', 6, 0, -100);
+            if (this.textures.getFrame('human-body', 'AlternativeHead')) {
+                this.character.setBodyPart('head', 'AlternativeHead', 0, -40);
+            } else {
+                console.warn('AlternativeHead frame not found');
+            }
         });
 
         const resetHead = this.add.text(20, 180, 'Reset Head', {
@@ -147,7 +124,9 @@ export class CharGen extends Scene {
         }).setInteractive();
         
         resetHead.on('pointerdown', () => {
-            this.character.setBodyPart('head', 'head', 0, -100);
+            if (this.textures.getFrame('human-body', 'Head')) {
+                this.character.setBodyPart('head', 'Head', 0, -40);
+            }
         });
     }
 
